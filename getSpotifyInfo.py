@@ -3,6 +3,7 @@ import base64
 import json
 from sys import exit
 
+#TO-DO: Make keys private, make visual representation, search for albums
 client_id = "21061c8a1abd4a97b12967c4035c07af"
 client_secret = "fd9c3250365a4fd48525e97fb5c2eb9a"
 
