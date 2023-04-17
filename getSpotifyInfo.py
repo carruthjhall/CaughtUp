@@ -2,6 +2,25 @@ import requests
 import base64
 import json
 
+client_id = "21061c8a1abd4a97b12967c4035c07af"
+client_secret = "fd9c3250365a4fd48525e97fb5c2eb9a"
+
+class artist:
+	def __init__(self, name, followers, popularity, uri):
+		self.name = name
+		self.followers = followers
+		self.popularity = popularity
+		self.uri = uri
+
+	def getArtistInfo(self):
+		print("----------------------------------")
+		print("|Artist: " + self.name + "|")
+		print("----------------------------------")
+		print("Followers: ", self.followers)
+		print("Popularity: ", self.popularity)
+		print("URI: " + self.uri)
+		
+
 def authorize(cli_ID, cli_s):
 	encoded = base64.b64encode((cli_ID+ ":" + cli_s).encode("ascii")).decode("ascii")
 	headers = {
@@ -31,12 +50,10 @@ def authorize(cli_ID, cli_s):
 	#print(expiry)
 
 
-def getArtist(accessToken, tokenType):
+def getArtist(accessToken, tokenType, artistURI):
 	#print("Access Token: " + accessToken)
 
 	authHeader = {"Authorization": tokenType + " " + accessToken}
-	
-	artistURI = "4hz8tIajF2INpgM0qzPJz2"
 	
 	artist = {"URL": "https://api.spotify.com/v1/artists/" + artistURI}
 	
@@ -46,15 +63,18 @@ def getArtist(accessToken, tokenType):
 		print(getResponse)
 		quit()
 	else:
-		print("Artist data received.\nPrinting: \n")
+		print("Artist data received.")
 		return getResponse.json()
 
-client_id = "21061c8a1abd4a97b12967c4035c07af"
-client_secret = "fd9c3250365a4fd48525e97fb5c2eb9a"
 
 response = authorize(client_id, client_secret)
 
-artistInfo = getArtist(response.json()["access_token"], response.json()["token_type"])
-print(artistInfo)
 
+uri = "5ZS223C6JyBfXasXxrRqOk"
 
+info = getArtist(response.json()["access_token"], response.json()["token_type"], uri)
+#print(info)
+
+artist1 = artist(info["name"], info["followers"]["total"], info["popularity"], info["uri"])
+
+artist1.getArtistInfo()
