@@ -1,25 +1,11 @@
 import requests
 import base64
 import json
+from sys import exit
 
 client_id = "21061c8a1abd4a97b12967c4035c07af"
 client_secret = "fd9c3250365a4fd48525e97fb5c2eb9a"
 
-class artist:
-	def __init__(self, name, followers, popularity, uri):
-		self.name = name
-		self.followers = followers
-		self.popularity = popularity
-		self.uri = uri
-
-	def getArtistInfo(self):
-		print("----------------------------------")
-		print("|Artist: " + self.name + "|")
-		print("----------------------------------")
-		print("Followers: ", self.followers)
-		print("Popularity: ", self.popularity)
-		print("URI: " + self.uri)
-		
 
 def authorize(cli_ID, cli_s):
 	encoded = base64.b64encode((cli_ID+ ":" + cli_s).encode("ascii")).decode("ascii")
@@ -41,17 +27,9 @@ def authorize(cli_ID, cli_s):
 		print("Access token received.")
 		return response
 
-	#accessToken = response.json()["access_token"]
-	#tokenType = response.json()["token_type"]
-	#expiry = response.json()["expires_in"]
-
-	#print(json.dumps(accessToken, indent=4))
-	#print(tokenType)
-	#print(expiry)
-
-
-def getArtist(accessToken, tokenType, artistURI):
+def getArtist(accessToken, tokenType, artistURI, artist):
 	#print("Access Token: " + accessToken)
+	print("Getting " + artist + "'s information")
 
 	authHeader = {"Authorization": tokenType + " " + accessToken}
 	
@@ -66,14 +44,48 @@ def getArtist(accessToken, tokenType, artistURI):
 		print("Artist data received.")
 		return getResponse.json()
 
+def searchArtist(accessToken, tokenType, artist):
+	print("----------------------------------")
+	print("Searching for " + artist)
+
+	authHeader = {"Authorization": tokenType + " " + accessToken}
+	params = {"q" : artist, "type" : ["artist"]}
+	
+	getResponse = requests.get("https://api.spotify.com/v1/search",params=params, headers=authHeader)
+
+	if getResponse.status_code != 200:
+		print(getResponse)
+		quit()
+
+	info = getResponse.json()['artists']['items']
+	
+	if info[0]['name'].lower() != artist:
+		print(info[0]['name'] + " does not match " + artist)
+		exit()
+	
+	print("Artist " + info[0]['name'] + " found.")
+	return info[0]['id']	
+
+class artist:
+	def __init__(self, name, followers, popularity, uri):
+		self.name = name
+		self.followers = followers
+		self.popularity = popularity
+		self.uri = uri
+
+	def getArtistInfo(self):
+		print("----------------------------------")
+		print("|Artist: " + self.name + "|")
+		print("----------------------------------")
+		print("Followers: ", self.followers)
+		print("Popularity: ", self.popularity)
+		print("URI: " + self.uri)
 
 response = authorize(client_id, client_secret)
 
+userSearch = input("Enter artist name:")
 
-uri = "5ZS223C6JyBfXasXxrRqOk"
-
-info = getArtist(response.json()["access_token"], response.json()["token_type"], uri)
-#print(info)
+info = getArtist(response.json()["access_token"], response.json()["token_type"], searchArtist(response.json()["access_token"], response.json()["token_type"], userSearch), userSearch)
 
 artist1 = artist(info["name"], info["followers"]["total"], info["popularity"], info["uri"])
 
